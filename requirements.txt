@@ -1,0 +1,38 @@
+# FastAPI and server
+fastapi
+uvicorn
+python-multipart
+
+# Authentication
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
+
+# Database and Vector Store
+pymilvus==2.5.11
+sqlalchemy
+databases[postgresql]
+
+# AI and NLP
+openai
+sentence-transformers
+transformers
+torch
+
+# Document processing
+PyPDF2
+python-docx
+pdfplumber
+
+# GitHub API
+PyGithub
+requests
+
+# Utilities
+pydantic
+jinja2
+aiofiles
+pandas
+python-dotenv
+pydantic[email]
+pydantic-settings

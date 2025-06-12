@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Recruitment Assistant</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        .auth-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .hidden {
+            display: none;
+        }
+        .manager-section {
+            background-color: #e8f5e8;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .employee-section {
+            background-color: #e8f0ff;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .candidate-card {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .message {
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+            position: relative;
+            animation: slideIn 0.3s ease-out;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .chat-interface {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            height: 300px;
+            overflow-y: auto;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .chat-message {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            animation: fadeIn 0.3s ease-in;
+        }
+        .user-message {
+            background-color: #007bff;
+            color: white;
+            text-align: right;
+            margin-left: 20%;
+        }
+        .bot-message {
+            background-color: #f8f9fa;
+            color: #333;
+            margin-right: 20%;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .loading {
+            display: inline-block;
+            margin: 10px;
+            font-style: italic;
+            color: #666;
+        }
+        .loading::after {
+            content: '';
+            animation: dots 1.5s steps(5, end) infinite;
+        }
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60% { content: '...'; }
+            80%, 100% { content: ''; }
+        }
+        .skill-tag {
+            display: inline-block;
+            background-color: #e7f3ff;
+            color: #004085;
+            padding: 3px 8px;
+            margin: 2px;
+            border-radius: 12px;
+            font-size: 12px;
+            border: 1px solid #b3d7ff;
+        }
+        .score-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 5px 0;
+        }
+        .score-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #ffc107, #dc3545);
+            transition: width 0.3s ease;
+        }
+        .chat-input-container {
+            display: flex;
+            gap: 10px;
+            align-items: stretch;
+        }
+        .chat-input-container input {
+            flex: 1;
+            margin: 0;
+        }
+        .chat-input-container button {
+            margin: 0;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 HR Recruitment Assistant</h1>
+            <p>AI-powered candidate matching and profile management</p>
+        </div>
+
+        <!-- Authentication Section -->
+        <div id="auth-section">
+            <div class="auth-section">
+                <div>
+                    <h3>Login</h3>
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label for="loginEmail">Email:</label>
+                            <input type="email" id="loginEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword">Password:</label>
+                            <input type="password" id="loginPassword" required>
+                        </div>
+                        <button type="submit" id="loginBtn">Login</button>
+                    </form>
+                </div>
+                <div>
+                    <h3>Register</h3>
+                    <form id="registerForm">
+                        <div class="form-group">
+                            <label for="registerEmail">Email:</label>
+                            <input type="email" id="registerEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerName">Full Name:</label>
+                            <input type="text" id="registerName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerRole">Role:</label>
+                            <select id="registerRole" required>
+                                <option value="employee">Employee</option>
+                                <option value="manager">Manager</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPassword">Password:</label>
+                            <input type="password" id="registerPassword" required>
+                        </div>
+                        <button type="submit" id="registerBtn">Register</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Employee Dashboard -->
+        <div id="employee-dashboard" class="hidden">
+            <div class="employee-section">
+                <h3>📄 Upload Your Profile</h3>
+                <form id="profileForm" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="resumeFile">Resume (PDF/DOCX):</label>
+                        <input type="file" id="resumeFile" accept=".pdf,.doc,.docx">
+                    </div>
+                    <div class="form-group">
+                        <label for="githubUrl">GitHub Profile URL:</label>
+                        <input type="url" id="githubUrl" placeholder="https://github.com/username">
+                    </div>
+                    <div class="form-group">
+                        <label for="additionalInfo">Additional Information:</label>
+                        <textarea id="additionalInfo" rows="4" placeholder="Any additional skills, experiences, or information..."></textarea>
+                    </div>
+                    <button type="submit" id="uploadBtn">Upload Profile</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Manager Dashboard -->
+        <div id="manager-dashboard" class="hidden">
+            <div class="manager-section">
+                <h3>🤖 AI Recruitment Assistant</h3>
+                <div class="chat-interface" id="chatInterface">
+                    <div class="chat-message bot-message">
+                        Hello! I'm your AI recruitment assistant. Ask me to find candidates based on skills, experience, or requirements.
+                        <br><br>
+                        Examples:
+                        <ul>
+                            <li>"Find candidates with Python and machine learning experience"</li>
+                            <li>"I need a senior React developer"</li>
+                            <li>"Show me candidates with AWS certifications"</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="chat-input-container">
+                    <input type="text" id="chatInput" placeholder="Ask me to find candidates..." onkeypress="handleChatKeyPress(event)">
+                    <button onclick="sendChatMessage()" id="sendBtn">Send</button>
+                </div>
+                
+                <h4>🔍 Advanced Search</h4>
+                <form id="searchForm">
+                    <div class="form-group">
+                        <label for="searchQuery">Search Query:</label>
+                        <input type="text" id="searchQuery" placeholder="e.g., Python developer with 5 years experience">
+                    </div>
+                    <div class="form-group">
+                        <label for="searchLimit">Number of Results:</label>
+                        <select id="searchLimit">
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="20">20</option>
+                        </select>
+                    </div>
+                    <button type="submit" id="searchBtn">Search Candidates</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results" class="results hidden"></div>
+
+        <!-- Logout Button -->
+        <div id="logout-section" class="hidden" style="text-align: center; margin-top: 20px;">
+            <button onclick="logout()" style="background-color: #dc3545;">Logout</button>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let authToken = null;
+
+        // Show message function
+        function showMessage(message, type = 'info') {
+            // Remove existing messages
+            const existingMessages = document.querySelectorAll('.message');
+            existingMessages.forEach(msg => msg.remove());
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = message;
+            
+            // Insert after header
+            const header = document.querySelector('.header');
+            header.insertAdjacentElement('afterend', messageDiv);
+            
+            // Remove message after 5 seconds
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.remove();
+                }
+            }, 5000);
+        }
+
+        // Handle Enter key in chat input
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendChatMessage();
+            }
+        }
+
+        // Set loading state for buttons
+        function setButtonLoading(buttonId, isLoading, originalText = 'Submit') {
+            const button = document.getElementById(buttonId);
+            if (isLoading) {
+                button.disabled = true;
+                button.textContent = 'Loading...';
+            } else {
+                button.disabled = false;
+                button.textContent = originalText;
+            }
+        }
+
+        // Login Form
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            setButtonLoading(submitBtn.id || 'loginBtn', true, 'Login');
+
+            try {
+                const formData = new URLSearchParams();
+                formData.append('username', email);  // OAuth2 expects 'username'
+                formData.append('password', password);
+                
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    authToken = data.access_token;
+                    currentUser = data.user;
+                    showDashboard();
+                    showMessage(`Welcome back, ${currentUser.full_name}!`, 'success');
+                } else {
+                    const error = await response.json();
+                    showMessage(error.detail || 'Login failed', 'error');
+                }
+            } catch (error) {
+                showMessage('Login failed: ' + error.message, 'error');
+            } finally {
+                setButtonLoading(submitBtn.id || 'loginBtn', false, 'Login');
+            }
+        });
+
+        // Register Form
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('registerEmail').value;
+            const full_name = document.getElementById('registerName').value;
+            const role = document.getElementById('registerRole').value;
+            const password = document.getElementById('registerPassword').value;
+
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            setButtonLoading(submitBtn.id || 'registerBtn', true, 'Register');
+
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, full_name, role, password })
+                });
+
+                if (response.ok) {
+                    showMessage('Registration successful! Please login.', 'success');
+                    document.getElementById('registerForm').reset();
+                } else {
+                    const error = await response.json();
+                    showMessage(error.detail || 'Registration failed', 'error');
+                }
+            } catch (error) {
+                showMessage('Registration failed: ' + error.message, 'error');
+            } finally {
+                setButtonLoading(submitBtn.id || 'registerBtn', false, 'Register');
+            }
+        });
+
+        // Profile Upload Form
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData();
+            
+            const resumeFile = document.getElementById('resumeFile').files[0];
+            const githubUrl = document.getElementById('githubUrl').value;
+            const additionalInfo = document.getElementById('additionalInfo').value;
+
+            if (!resumeFile && !githubUrl && !additionalInfo) {
+                showMessage('Please provide at least one input (resume, GitHub URL, or additional info)', 'warning');
+                return;
+            }
+
+            if (resumeFile) {
+                formData.append('resume_file', resumeFile);
+            }
+            if (githubUrl) {
+                formData.append('github_url', githubUrl);
+            }
+            if (additionalInfo) {
+                formData.append('additional_info', additionalInfo);
+            }
+
+            setButtonLoading('uploadBtn', true, 'Upload Profile');
+
+            try {
+                const response = await fetch('/profile/upload', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showMessage('Profile uploaded successfully!', 'success');
+                    document.getElementById('profileForm').reset();
+                    
+                    // Show results
+                    document.getElementById('results').innerHTML = `
+                        <h4>✅ Profile Processing Results:</h4>
+                        <div class="candidate-card">
+                            <p><strong>Summary:</strong> ${data.summary || 'Generated successfully'}</p>
+                            <p><strong>Skills Found:</strong> ${data.skills_found || 'Extracted from profile'}</p>
+                            <p><strong>Certifications Found:</strong> ${data.certifications_found || 'None specified'}</p>
+                        </div>
+                    `;
+                    document.getElementById('results').classList.remove('hidden');
+                } else {
+                    const error = await response.json();
+                    showMessage(error.detail || 'Upload failed', 'error');
+                }
+            } catch (error) {
+                showMessage('Upload failed: ' + error.message, 'error');
+            } finally {
+                setButtonLoading('uploadBtn', false, 'Upload Profile');
+            }
+        });
+
+        // Search Form
+        document.getElementById('searchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const query = document.getElementById('searchQuery').value;
+            const limit = parseInt(document.getElementById('searchLimit').value);
+
+            if (!query.trim()) {
+                showMessage('Please enter a search query', 'warning');
+                return;
+            }
+
+            setButtonLoading('searchBtn', true, 'Search Candidates');
+
+            try {
+                const response = await fetch('/search/candidates', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ query, limit })
+                });
+
+                if (response.ok) {
+                    const results = await response.json();
+                    displaySearchResults(results);
+                    showMessage(`Found ${results.length} candidates`, 'success');
+                } else {
+                    const error = await response.json();
+                    showMessage(error.detail || 'Search failed', 'error');
+                }
+            } catch (error) {
+                showMessage('Search failed: ' + error.message, 'error');
+            } finally {
+                setButtonLoading('searchBtn', false, 'Search Candidates');
+            }
+        });
+
+        // Chat functionality
+        async function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const query = input.value.trim();
+            
+            if (!query) {
+                showMessage('Please enter a message', 'warning');
+                return;
+            }
+
+            // Add user message to chat
+            addChatMessage(query, 'user');
+            input.value = '';
+            
+            // Add loading message
+            const loadingMsg = addChatMessage('Searching for candidates', 'bot', true);
+            setButtonLoading('sendBtn', true, 'Send');
+
+            try {
+                const response = await fetch('/chat/suggestions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: `query=${encodeURIComponent(query)}`
+                });
+
+                // Remove loading message
+                if (loadingMsg && loadingMsg.parentNode) {
+                    loadingMsg.remove();
+                }
+
+                if (response.ok) {
+                    const data = await response.json();
+                    addChatMessage(data.response, 'bot');
+                    
+                    if (data.candidates && data.candidates.length > 0) {
+                        displaySearchResults(data.candidates);
+                        showMessage(`Found ${data.candidates.length} matching candidates`, 'success');
+                    }
+                } else {
+                    const error = await response.json();
+                    addChatMessage('Sorry, I encountered an error: ' + (error.detail || 'Unknown error'), 'bot');
+                }
+            } catch (error) {
+                // Remove loading message
+                if (loadingMsg && loadingMsg.parentNode) {
+                    loadingMsg.remove();
+                }
+                addChatMessage('Sorry, I encountered an error: ' + error.message, 'bot');
+            } finally {
+                setButtonLoading('sendBtn', false, 'Send');
+            }
+        }
+
+        function addChatMessage(message, type, isLoading = false) {
+            const chatInterface = document.getElementById('chatInterface');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${type}-message`;
+            
+            if (isLoading) {
+                messageDiv.innerHTML = `<span class="loading">${message}</span>`;
+            } else {
+                messageDiv.textContent = message;
+            }
+            
+            chatInterface.appendChild(messageDiv);
+            chatInterface.scrollTop = chatInterface.scrollHeight;
+            
+            return messageDiv;
+        }
+
+        function displaySearchResults(results) {
+            const resultsDiv = document.getElementById('results');
+            
+            if (results.length === 0) {
+                resultsDiv.innerHTML = '<p>🔍 No candidates found matching your criteria. Try adjusting your search terms.</p>';
+            } else {
+                let html = `<h4>🎯 Found ${results.length} Candidates:</h4>`;
+                results.forEach(candidate => {
+                    const score = candidate.similarity_score ? (candidate.similarity_score * 100).toFixed(1) : 0;
+                    const skills = candidate.skills || [];
+                    const skillsHtml = Array.isArray(skills) 
+                        ? skills.map(skill => typeof skill === 'object' ? skill.name : skill)
+                               .map(skillNames => `<span class="skill-tag">${skillNames}</span>`).join(' ')
+                        : skills.toString();
+
+                    html += `
+                        <div class="candidate-card">
+                            <h5>👤 ${candidate.full_name || 'Unknown'}</h5>
+                            <p><strong>📧 Email:</strong> ${candidate.email || 'Not provided'}</p>
+                            <div>
+                                <strong>🎯 Match Score:</strong> ${score}%
+                                <div class="score-bar">
+                                    <div class="score-fill" style="width: ${score}%"></div>
+                                </div>
+                            </div>
+                            <p><strong>📝 Summary:</strong> ${candidate.summary || 'No summary available'}</p>
+                            <div><strong>🛠️ Skills:</strong> ${skillsHtml || 'No skills listed'}</div>
+                        </div>
+                    `;
+                });
+                resultsDiv.innerHTML = html;
+            }
+            
+            resultsDiv.classList.remove('hidden');
+        }
+
+        function showDashboard() {
+            document.getElementById('auth-section').classList.add('hidden');
+            document.getElementById('logout-section').classList.remove('hidden');
+            
+            if (currentUser.role === 'manager') {
+                document.getElementById('manager-dashboard').classList.remove('hidden');
+            } else {
+                document.getElementById('employee-dashboard').classList.remove('hidden');
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            authToken = null;
+            document.getElementById('auth-section').classList.remove('hidden');
+            document.getElementById('logout-section').classList.add('hidden');
+            document.getElementById('manager-dashboard').classList.add('hidden');
+            document.getElementById('employee-dashboard').classList.add('hidden');
+            document.getElementById('results').classList.add('hidden');
+            
+            // Clear forms
+            document.getElementById('loginForm').reset();
+            document.getElementById('registerForm').reset();
+            if (document.getElementById('profileForm')) {
+                document.getElementById('profileForm').reset();
+            }
+            if (document.getElementById('searchForm')) {
+                document.getElementById('searchForm').reset();
+            }
+            
+            // Clear chat
+            const chatInterface = document.getElementById('chatInterface');
+            if (chatInterface) {
+                chatInterface.innerHTML = `
+                    <div class="chat-message bot-message">
+                        Hello! I'm your AI recruitment assistant. Please login to start finding candidates.
+                    </div>
+                `;
+            }
+            
+            showMessage('Logged out successfully!', 'info');
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is already logged in (you can implement localStorage for persistence if needed)
+            showMessage('Welcome to HR Recruitment Assistant! Please login or register to continue.', 'info');
+        });
+    </script>
+</body>
+</html>
